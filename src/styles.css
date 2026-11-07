@@ -56,7 +56,7 @@
   --color-border: var(--border);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", "Noto Sans Telugu", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
   --shadow-soft: var(--shadow-soft);
   --color-input: var(--input);
