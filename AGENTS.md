@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Demo data, scoring and eligibility rules live in src/lib/agri-data.ts; profile + language state in src/lib/app-store.tsx (localStorage) — single source until a backend is added.
