@@ -50,11 +50,11 @@ function CropsPage() {
     setTimeout(() => {
       const r = recommend({ district, soil, season, irrigation, landAcres: acres });
       setResults(r); setLoading(false);
-      toast.success(`Top match: ${r[0].crop.name}`);
+      if (r[0]) toast.success(`Top match: ${r[0].crop.name}`);
     }, 700);
   };
 
-  const chartData = results?.map(({ crop, score }) => ({ name: crop.name.split(" (")[0], Soil: score.soil, Season: score.season, Water: score.water, Region: score.region }));
+  const chartData = (results ?? []).map(({ crop, score }) => ({ name: crop.name.split(" (")[0] ?? crop.name, Soil: score.soil, Season: score.season, Water: score.water, Region: score.region }));
 
   return (
     <div>

@@ -33,8 +33,8 @@ function ProfilePage() {
   const set = <K extends keyof Profile>(k: K, v: Profile[K]) => setF({ ...f, [k]: v });
 
   const save = () => {
-    if (!f.name.trim()) return toast.error("Please enter the farmer name");
-    if (!(f.landAcres > 0)) return toast.error("Land size must be greater than 0");
+    if (!f.name.trim()) { toast.error("Please enter the farmer name"); return; }
+    if (!(f.landAcres > 0)) { toast.error("Land size must be greater than 0"); return; }
     setProfile(f);
     toast.success("Profile saved", { action: { label: "Get crops", onClick: () => nav({ to: "/crops" }) } });
   };
