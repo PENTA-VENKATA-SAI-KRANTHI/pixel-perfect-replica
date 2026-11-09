@@ -1,5 +1,7 @@
 # AgriMitra AI — Roadmap
 
+Done so far: Telugu crop explanations in data; rule logic for crop breakdown, scheme matches and checklist (src/lib/farm-plan.ts) with tests. Screens below still to build.
+
 - [ ] Farmer Decision Plan page (/plan): inputs → crop fit → scheme matches → checklist
 - [ ] Transparent crop breakdown (matched / attention / water fit / precaution, Why this crop?, comparison) on /plan and /crops
 - [ ] Scheme matches grounded in existing scheme data, "Verify eligibility" / "Check official source"
