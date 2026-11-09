@@ -29,33 +29,54 @@ export interface Crop {
   why: string;
   weather: string;
   limits: string;
+  whyTe: string;
+  weatherTe: string;
+  limitsTe: string;
 }
 
 export const CROPS: Crop[] = [
   { id: "paddy", name: "Paddy (Rice)", te: "వరి", image: paddyImg, soils: ["Alluvial", "Loamy", "Black"], seasons: ["Kharif", "Rabi"], water: "High", coastalBonus: true,
     why: "Widely grown staple in coastal Andhra; clay-rich alluvial and loamy soils hold standing water well.",
     weather: "Needs assured water through tillering and flowering; heavy cyclone-season rain can cause lodging.",
-    limits: "High water demand — risky without irrigation or reliable monsoon. Watch for pests like stem borer." },
+    limits: "High water demand — risky without irrigation or reliable monsoon. Watch for pests like stem borer.",
+    whyTe: "తీరాంధ్రలో విస్తృతంగా పండే ప్రధాన పంట; ఒండ్రు, గరప నేలలు నిలిచిన నీటిని బాగా పట్టి ఉంచుతాయి.",
+    weatherTe: "పిలకలు వేసే దశ నుంచి పూత వరకు నీరు తప్పనిసరి; తుఫాను సీజన్ భారీ వర్షాలకు పంట పడిపోవచ్చు.",
+    limitsTe: "నీటి అవసరం ఎక్కువ — నీటిపారుదల లేదా నమ్మకమైన వర్షం లేకుంటే ప్రమాదం. కాండం తొలుచు పురుగును గమనించండి." },
   { id: "groundnut", name: "Groundnut", te: "వేరుశనగ", image: groundnutImg, soils: ["Red", "Sandy", "Loamy"], seasons: ["Kharif", "Rabi"], water: "Low", coastalBonus: false,
     why: "Well-drained red and sandy soils suit pod development; tolerant of moderate dry spells.",
     weather: "Avoid waterlogging; dry weather at harvest helps pod quality.",
-    limits: "Prolonged drought at pegging stage reduces pods. Market prices fluctuate." },
+    limits: "Prolonged drought at pegging stage reduces pods. Market prices fluctuate.",
+    whyTe: "నీరు బాగా ఇంకే ఎర్ర, ఇసుక నేలలు కాయల అభివృద్ధికి అనుకూలం; మధ్యస్థ పొడి వాతావరణాన్ని తట్టుకుంటుంది.",
+    weatherTe: "నీరు నిలవకుండా చూడండి; కోత సమయంలో పొడి వాతావరణం కాయల నాణ్యతకు మంచిది.",
+    limitsTe: "ఊడలు దిగే దశలో ఎక్కువ రోజులు వర్షం లేకపోతే కాయలు తగ్గుతాయి. మార్కెట్ ధరలు మారుతుంటాయి." },
   { id: "maize", name: "Maize", te: "మొక్కజొన్న", image: maizeImg, soils: ["Loamy", "Alluvial", "Red", "Black"], seasons: ["Kharif", "Rabi", "Zaid"], water: "Medium", coastalBonus: false,
     why: "Adaptable across soils and seasons; good fit for rotation after paddy.",
     weather: "Sensitive to waterlogging and to heat stress at tasseling.",
-    limits: "Fall armyworm risk; needs moderate irrigation in Rabi/Zaid." },
+    limits: "Fall armyworm risk; needs moderate irrigation in Rabi/Zaid.",
+    whyTe: "అనేక నేలలు, సీజన్లకు అనువైనది; వరి తర్వాత పంట మార్పిడికి మంచి ఎంపిక.",
+    weatherTe: "నీరు నిలవడం, పూత దశలో అధిక వేడి పంటకు నష్టం కలిగిస్తాయి.",
+    limitsTe: "కత్తెర పురుగు (ఫాల్ ఆర్మీవార్మ్) ప్రమాదం; రబీ/వేసవిలో మధ్యస్థ నీటిపారుదల అవసరం." },
   { id: "blackgram", name: "Black Gram (Urad)", te: "మినుములు", image: pulsesImg, soils: ["Black", "Loamy", "Alluvial", "Red"], seasons: ["Rabi", "Kharif", "Zaid"], water: "Low", coastalBonus: true,
     why: "Short-duration pulse that fits rice-fallow systems and adds nitrogen to the soil.",
     weather: "Grows on residual moisture; unseasonal rain at maturity can damage pods.",
-    limits: "Yellow mosaic virus risk. Lower returns per acre than cash crops." },
+    limits: "Yellow mosaic virus risk. Lower returns per acre than cash crops.",
+    whyTe: "వరి మాగాణుల్లో సరిపోయే తక్కువ కాలపు పప్పు పంట; నేలకు నత్రజని అందిస్తుంది.",
+    weatherTe: "మిగిలిన తేమతో పెరుగుతుంది; కోత దశలో అకాల వర్షం కాయలను దెబ్బతీస్తుంది.",
+    limitsTe: "పల్లాకు తెగులు (ఎల్లో మొజాయిక్) ప్రమాదం. వాణిజ్య పంటల కంటే ఎకరానికి ఆదాయం తక్కువ." },
   { id: "ragi", name: "Ragi (Finger Millet)", te: "రాగులు", image: pulsesImg, soils: ["Red", "Sandy", "Loamy"], seasons: ["Kharif", "Zaid"], water: "Low", coastalBonus: false,
     why: "Hardy millet for rainfed upland plots; tolerates poorer soils.",
     weather: "Handles dry spells well; heavy rain at harvest affects grain.",
-    limits: "Smaller market in some districts; manual harvesting can be labour-intensive." },
+    limits: "Smaller market in some districts; manual harvesting can be labour-intensive.",
+    whyTe: "వర్షాధార మెట్ట భూములకు తట్టుకునే చిరుధాన్యం; సారం తక్కువ నేలల్లోనూ పెరుగుతుంది.",
+    weatherTe: "పొడి వాతావరణాన్ని బాగా తట్టుకుంటుంది; కోత సమయంలో భారీ వర్షం గింజను దెబ్బతీస్తుంది.",
+    limitsTe: "కొన్ని జిల్లాల్లో మార్కెట్ చిన్నది; చేతితో కోతకు కూలీలు ఎక్కువ అవసరం." },
   { id: "greengram", name: "Green Gram (Moong)", te: "పెసలు", image: pulsesImg, soils: ["Loamy", "Red", "Sandy", "Alluvial"], seasons: ["Zaid", "Kharif", "Rabi"], water: "Low", coastalBonus: false,
     why: "Very short duration (about 60–70 days) — useful as a summer catch crop.",
     weather: "Needs warm, dry weather; susceptible to excess moisture.",
-    limits: "Uneven pod maturity may need multiple pickings." },
+    limits: "Uneven pod maturity may need multiple pickings.",
+    whyTe: "చాలా తక్కువ కాలం (సుమారు 60–70 రోజులు) — వేసవి అంతర పంటగా ఉపయోగకరం.",
+    weatherTe: "వెచ్చని, పొడి వాతావరణం కావాలి; అధిక తేమకు సులభంగా దెబ్బతింటుంది.",
+    limitsTe: "కాయలు ఒకేసారి పక్వానికి రావు, అనేకసార్లు కోయాల్సి రావచ్చు." },
 ];
 
 export interface ScoreInput { district: string; soil: Soil; season: Season; irrigation: Irrigation; landAcres: number; }
