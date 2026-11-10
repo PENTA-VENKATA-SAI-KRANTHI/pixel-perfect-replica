@@ -37,7 +37,8 @@ jobs:
           find .output -type f -name "*.css" -print
           echo "=== HTML FILES ==="
           find .output -type f -name "*.html" -print | head -20
-
+      - name: Check CSS link
+        run: grep -oE 'href="[^"]+\.css[^"]*"' .output/public/index.html
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
