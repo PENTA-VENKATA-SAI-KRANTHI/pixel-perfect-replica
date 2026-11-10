@@ -30,6 +30,11 @@ jobs:
 
       - name: Build application
         run: bun run build
+      - name: Check CSS output
+        run: echo "Generated CSS files:"
+          find .output -type f -name "*.css"
+          echo "Generated HTML files:"
+          find .output -type f -name "*.html" | head -20
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
