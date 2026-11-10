@@ -1,13 +1,12 @@
 # AgriMitra AI — Roadmap
 
-Done so far: Telugu crop explanations in data; rule logic for crop breakdown, scheme matches and checklist (src/lib/farm-plan.ts) with tests. Screens below still to build.
+Plan journey lives inside existing pages (no new nav item): Crops → Why this crop? → related support → action plan; Schemes shows match explanations.
 
-- [ ] Farmer Decision Plan page (/plan): inputs → crop fit → scheme matches → checklist
-- [ ] Transparent crop breakdown (matched / attention / water fit / precaution, Why this crop?, comparison) on /plan and /crops
-- [ ] Scheme matches grounded in existing scheme data, "Verify eligibility" / "Check official source"
-- [ ] Interactive checklist saved locally
-- [ ] Telugu for key journey labels, crop explanations, assistant prompts (partial, disclosed)
-- [ ] Context-aware rule-based assistant (uses plan, selected crop, matched schemes)
-- [ ] Weather labelled sample data + "no live weather API" note
-- [ ] "How recommendations work" section
-- [ ] Dashboard CTA + saved plan card; tests for new rules
+- [ ] Explainable crop results: "Why this crop?" (matched / attention / neutral, water & risk notes, fit label, preliminary-guidance note)
+- [ ] "Explore related support" per crop → Schemes page with crop context (?crop=&scheme=)
+- [ ] Farmer action plan checklist (soil/water, sowing window, seed, schemes & documents) saved locally
+- [ ] Scheme match explanation: Potential match / More information needed / May not match, satisfied / missing / needs verification
+- [ ] Telugu labels for new features + browser "Listen" button (hidden/disabled when unsupported)
+- [ ] Sample weather labelling + "no live weather API" note; "How recommendations work" panel; fictional sample farmer label
+- [ ] Dashboard saved-plan card; assistant uses saved plan (rule-based, labelled)
+- [ ] Tests for new rules; run tests; browser check

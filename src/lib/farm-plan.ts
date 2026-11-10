@@ -4,7 +4,7 @@
  * farmer reads always matches the score. Scheme matches only use fields that
  * already exist in SCHEMES; anything missing is shown as "Check official source".
  */
-import { CROPS, COASTAL, SCHEMES, recommend, scoreCrop, type Crop, type Irrigation, type Scheme, type ScoreBreakdown, type ScoreInput, type Season, type Soil } from "./agri-data";
+import { CROPS, COASTAL, SCHEMES, recommend, scoreCrop, type Answer, type Crop, type Irrigation, type Scheme, type ScoreBreakdown, type ScoreInput, type Season, type Soil } from "./agri-data";
 
 export interface Bi { en: string; te: string }
 
@@ -183,17 +183,96 @@ export function matchSchemes(i: ScoreInput, crop: Crop | null): SchemeMatch[] {
   }).sort((a, b) => b.priority - a.priority);
 }
 
+// ---------------- Suitability label ----------------
+
+export type FitLevel = "good" | "possible" | "weak";
+/** Plain-language label for the demo score. Not a yield or success prediction. */
+export function suitability(total: number): { level: FitLevel; label: Bi } {
+  if (total >= 75) return { level: "good", label: { en: "Good fit (demo score)", te: "మంచి అనుకూలత (డెమో స్కోరు)" } };
+  if (total >= 50) return { level: "possible", label: { en: "Possible fit (demo score)", te: "సాధ్యమైన అనుకూలత (డెమో స్కోరు)" } };
+  return { level: "weak", label: { en: "Weak fit (demo score)", te: "బలహీన అనుకూలత (డెమో స్కోరు)" } };
+}
+
+// ---------------- Scheme assessment ----------------
+
+/** Telugu versions of the existing eligibility questions (same meaning, keyed by question id). */
+export const QUESTION_TE: Record<string, string> = {
+  land: "మీరు వ్యవసాయ భూమిని కలిగి ఉన్నారా లేదా సాగు చేస్తున్నారా?",
+  docs: "మీకు ఆధార్ కార్డు, బ్యాంక్ ఖాతా ఉన్నాయా?",
+  own: "వ్యవసాయ భూమి మీ కుటుంబం పేరున నమోదై ఉందా?",
+  tax: "గత సంవత్సరం మీ కుటుంబంలో ఎవరైనా ఆదాయపు పన్ను చెల్లించారా?",
+  govt: "మీ కుటుంబంలో ఎవరైనా ప్రస్తుత లేదా రిటైర్డ్ ప్రభుత్వ ఉద్యోగి / రాజ్యాంగ పదవిలో ఉన్నారా?",
+  notified: "ఈ సీజన్‌లో మీ ప్రాంతంలో మీ పంట బీమాకు నోటిఫై అయిందా?",
+  water: "మీకు నీటి వనరు (బోరు, కాలువ, చెరువు) ఉందా?",
+  ap: "మీ వ్యవసాయ భూమి ఆంధ్రప్రదేశ్‌లో ఉందా?",
+};
+
+export type SchemeStatus = "potential" | "more-info" | "may-not-match";
+export interface SchemeContext { state: string; district: string; landAcres: number; irrigation: Irrigation }
+export interface SchemeAssessment { status: SchemeStatus; satisfied: Bi[]; failed: Bi[]; missing: Bi[]; verify: Bi[] }
+
+/**
+ * Compares the farmer's saved details (and any answers they gave in "Check My Eligibility")
+ * against the scheme's EXISTING questions. Never returns an official decision.
+ */
+export function assessScheme(s: Scheme, ctx: SchemeContext, saved: Record<string, Answer> = {}): SchemeAssessment {
+  const satisfied: Bi[] = [], failed: Bi[] = [], missing: Bi[] = [];
+  const inAP = /andhra/i.test(ctx.state);
+  for (const q of s.questions) {
+    const qTe = QUESTION_TE[q.id] ?? q.text;
+    const a = saved[q.id];
+    if (a === "yes" || a === "no") {
+      const yesTe = a === "yes" ? "అవును" : "కాదు";
+      if (a === q.failOn) failed.push({ en: q.explainFail, te: `${qTe} — మీ సమాధానం: ${yesTe}` });
+      else satisfied.push({ en: q.explainPass, te: `${qTe} — మీ సమాధానం: ${yesTe}` });
+      continue;
+    }
+    if (q.id === "land" && a !== "unsure") {
+      if (ctx.landAcres > 0) satisfied.push({ en: `Your profile lists ${ctx.landAcres} acres of farmland.`, te: `మీ ప్రొఫైల్‌లో ${ctx.landAcres} ఎకరాల వ్యవసాయ భూమి ఉంది.` });
+      else failed.push({ en: q.explainFail, te: "మీ ప్రొఫైల్‌లో వ్యవసాయ భూమి లేదు." });
+      continue;
+    }
+    if (q.id === "ap" && a !== "unsure" && ctx.state.trim()) {
+      if (inAP) satisfied.push({ en: `Your profile state is Andhra Pradesh (${ctx.district}).`, te: `మీ ప్రొఫైల్ రాష్ట్రం ఆంధ్రప్రదేశ్ (${ctx.district}).` });
+      else failed.push({ en: q.explainFail, te: "ఇది ఆంధ్రప్రదేశ్ రైతుల రాష్ట్ర పథకం; మీ ప్రొఫైల్ రాష్ట్రం వేరు." });
+      continue;
+    }
+    if (q.id === "water" && a !== "unsure" && ctx.irrigation === "Irrigated") {
+      satisfied.push({ en: "Your field is marked irrigated, so a water source is likely available.", te: "మీ పొలం నీటిపారుదల ఉన్నదిగా గుర్తించారు, కాబట్టి నీటి వనరు ఉండే అవకాశం ఉంది." });
+      continue;
+    }
+    missing.push({ en: q.text, te: qTe });
+  }
+  const verify: Bi[] = [
+    { en: "Final eligibility is decided only by the implementing authority.", te: "తుది అర్హతను అమలు చేసే అధికారులు మాత్రమే నిర్ణయిస్తారు." },
+    s.verified
+      ? { en: "Benefit and document list can change — confirm on the official portal.", te: "ప్రయోజనం, పత్రాల జాబితా మారవచ్చు — అధికారిక పోర్టల్‌లో నిర్ధారించుకోండి." }
+      : { en: "Benefit and rules shown here are demo info — check official source.", te: "ఇక్కడ చూపిన ప్రయోజనం, నియమాలు డెమో సమాచారం — అధికారిక మూలాన్ని తనిఖీ చేయండి." },
+  ];
+  const status: SchemeStatus = failed.length ? "may-not-match" : missing.length ? "more-info" : "potential";
+  return { status, satisfied, failed, missing, verify };
+}
+
 // ---------------- Action checklist ----------------
 
-export interface ChecklistItem { id: string; en: string; te: string; hintEn: string; hintTe: string }
+export interface ChecklistItem { id: string; title: Bi; hint: Bi }
+export const CHECKLIST_IDS = ["soil-water", "sowing-window", "seed", "schemes-docs"] as const;
 
-export const CHECKLIST: ChecklistItem[] = [
-  { id: "crop-fit", en: "Review the crop fit for my chosen crop", te: "నేను ఎంచుకున్న పంట అనుకూలతను సమీక్షించాలి",
-    hintEn: "Read the 'needs attention' factors and the precautions.", hintTe: "'జాగ్రత్త అవసరం' అంశాలు, జాగ్రత్తలు చదవండి." },
-  { id: "sowing-calendar", en: "Confirm the local sowing calendar with the agriculture extension officer / KVK", te: "స్థానిక విత్తే సమయాన్ని వ్యవసాయ విస్తరణ అధికారి / KVK వద్ద నిర్ధారించుకోవాలి",
-    hintEn: "Your Rythu Seva Kendram or Krishi Vigyan Kendra knows local dates and varieties.", hintTe: "రైతు సేవా కేంద్రం లేదా కృషి విజ్ఞాన కేంద్రానికి స్థానిక తేదీలు, రకాలు తెలుసు." },
-  { id: "verify-schemes", en: "Verify scheme details on the official portal", te: "పథకాల వివరాలను అధికారిక పోర్టల్‌లో ధృవీకరించాలి",
-    hintEn: "AgriMitra shows possible matches only — not official eligibility.", hintTe: "AgriMitra సాధ్యమైన పథకాలను మాత్రమే చూపుతుంది — అధికారిక అర్హత కాదు." },
-  { id: "documents", en: "Prepare documents only after checking each scheme's requirements", te: "ప్రతి పథకం అవసరాలు తనిఖీ చేసిన తర్వాతే పత్రాలు సిద్ధం చేయాలి",
-    hintEn: "Requirements can change; use the official list.", hintTe: "అవసరాలు మారవచ్చు; అధికారిక జాబితాను ఉపయోగించండి." },
-];
+/** Personalised next steps after choosing a crop. Hints never invent dates or varieties. */
+export function buildChecklist(c: Crop, i: ScoreInput): ChecklistItem[] {
+  const irrTe = IRRIGATION_TE[i.irrigation];
+  return [
+    { id: "soil-water", title: { en: "Confirm soil and water availability", te: "నేల, నీటి లభ్యతను నిర్ధారించుకోండి" },
+      hint: { en: `${c.name} has a ${c.water.toLowerCase()} water need. You entered ${i.soil} soil and a ${i.irrigation.toLowerCase()} field — a soil test can confirm your soil.`,
+        te: `${c.te}కు నీటి అవసరం ${WATER_TE[c.water]}. మీరు ${SOIL_TE[i.soil]}, ${irrTe} పొలం అని ఇచ్చారు — మట్టి పరీక్షతో నేలను నిర్ధారించుకోండి.` } },
+    { id: "sowing-window", title: { en: "Check the local sowing window", te: "స్థానిక విత్తే సమయాన్ని తనిఖీ చేయండి" },
+      hint: { en: `Ask your agriculture extension officer, Rythu Seva Kendram or KVK for ${i.season} sowing dates for ${c.name} in ${i.district}.`,
+        te: `${i.district}లో ${SEASON_TE[i.season]} సీజన్‌కు ${c.te} విత్తే తేదీల కోసం వ్యవసాయ విస్తరణ అధికారి, రైతు సేవా కేంద్రం లేదా KVKను అడగండి.` } },
+    { id: "seed", title: { en: "Verify seed availability", te: "విత్తనాల లభ్యతను నిర్ధారించుకోండి" },
+      hint: { en: `Check which ${c.name} varieties and certified seed are available locally before buying.`,
+        te: `కొనే ముందు స్థానికంగా ఏ ${c.te} రకాలు, ధృవీకరించిన విత్తనాలు లభిస్తాయో తెలుసుకోండి.` } },
+    { id: "schemes-docs", title: { en: "Review relevant schemes and documents", te: "సంబంధిత పథకాలు, పత్రాలను సమీక్షించండి" },
+      hint: { en: "Open the related schemes, check eligibility and prepare documents from the official list.",
+        te: "సంబంధిత పథకాలను తెరిచి, అర్హత తనిఖీ చేసి, అధికారిక జాబితా ప్రకారం పత్రాలు సిద్ధం చేయండి." } },
+  ];
+}
